@@ -1,5 +1,12 @@
 import * as React from 'react'
-import { IStore } from './interfaces'
+
+interface IStore {
+  state: any
+  setState: (changes: any) => void
+  listeners: any[]
+  actions: any[]
+  debug: boolean
+}
 
 function setState(this: IStore, changes: any) {
   const oldState = { ...this.state }
@@ -61,12 +68,13 @@ const initializer = (store: IStore) => {
 const useStore = <S>(
   initialState: S,
   actions: any,
+  persist = false,
   debug = false
 ): (() => [S, any]) => {
   const store: IStore = { state: initialState, listeners: [], debug, setState, actions }
   store.setState = setState.bind(store)
   store.actions = associateActions(store, actions)
-  if (initializer) store.setState(initializer(store))
+  if (persist) store.setState(initializer(store))
   return useCustom.bind(store, React)
 }
 

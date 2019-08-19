@@ -1,5 +1,5 @@
 {
-  "name": "use-global-hook",
+  "name": "@marconisi/use-global-hook",
   "version": "0.1.0",
   "description": "State management for React using Hooks with Typescript.",
   "main": "dist/index.js",
