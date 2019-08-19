@@ -6,7 +6,7 @@ This library need React and ReactDOM as peer dependencies with a version greater
 
 ### Installation
 ```
-npm i @marconisi/use-global-hook
+npm i use-global-hook-ts
 ```
 
 ### Docs
@@ -22,7 +22,7 @@ Each ```action``` receive as first parameter the ```Store```. With this store yo
 ### Basic example
 ```tsx
 import React from 'react'
-import useGlobalHook, { IStore } from '@marconisi/use-global-hook'
+import useGlobalHook, { IStore } from 'use-global-hook-ts'
 
 interface IAppState {
   text: string
