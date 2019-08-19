@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "watch": "./node_modules/.bin/tsc --watch",
     "build": "./node_modules/.bin/tsc --build"
   },
@@ -27,10 +27,17 @@
   },
   "homepage": "https://github.com/MarcoNisi/use-global-hook#readme",
   "devDependencies": {
-    "@types/react": "^16.9.2",
+    "@types/jest": "^24.0.17",
+    "@types/react": ">=16.8",
+    "@types/react-dom": ">=16.8",
+    "jest": "^24.9.0",
+    "react": ">=16.8",
+    "react-dom": ">=16.8",
+    "ts-jest": "^24.0.2",
     "typescript": "^3.5.3"
   },
   "peerDependencies": {
-    "react": ">=16.8"
+    "react": ">=16.8",
+    "react-dom": ">=16.8"
   }
 }
