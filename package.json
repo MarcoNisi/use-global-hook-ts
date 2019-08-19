@@ -1,0 +1,39 @@
+{
+  "name": "use-global-hook",
+  "version": "0.1.0",
+  "description": "State management for React using Hooks with Typescript.",
+  "main": "dist/index.js",
+  "types": "dist/interfaces.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "./node_modules/.bin/tsc --watch",
+    "build": "./node_modules/.bin/tsc --build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MarcoNisi/use-global-hook.git"
+  },
+  "keywords": [
+    "react",
+    "hooks",
+    "state",
+    "management",
+    "typescript"
+  ],
+  "author": "Marco Nisi",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/MarcoNisi/use-global-hook/issues"
+  },
+  "homepage": "https://github.com/MarcoNisi/use-global-hook#readme",
+  "devDependencies": {
+    "@types/react": "^16.9.2",
+    "typescript": "^3.5.3"
+  },
+  "peerDependencies": {
+    "react": ">=16.8"
+  },
+  "dependencies": {
+    "react": "^16.9.0"
+  }
+}

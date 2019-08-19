@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "strict": true,
+    "declaration": true,
+    "moduleResolution": "node",
+    "outDir": "./dist"
+  }
+}
