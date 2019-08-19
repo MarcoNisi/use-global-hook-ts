@@ -1,5 +1,3 @@
-import * as React from 'react'
-
 interface IStore {
   state: any
   setState: (changes: any) => void
@@ -66,6 +64,7 @@ const initializer = (store: IStore) => {
 }
 
 const useStore = <S>(
+  React: any,
   initialState: S,
   actions: any,
   persist = false,
