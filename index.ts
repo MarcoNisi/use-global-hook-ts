@@ -1,4 +1,4 @@
-interface IStore {
+export interface IStore {
   state: any
   setState: (changes: any) => void
   listeners: any[]
