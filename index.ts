@@ -63,7 +63,7 @@ const initializer = (store: IStore) => {
   }
 }
 
-const useStore = <S>(
+const useGlobalHook = <S>(
   React: any,
   initialState: S,
   actions: any,
@@ -77,4 +77,4 @@ const useStore = <S>(
   return useCustom.bind(store, React)
 }
 
-export default useStore
+export default useGlobalHook

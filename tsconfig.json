@@ -8,6 +8,8 @@
     "strict": true,
     "declaration": true,
     "moduleResolution": "node",
-    "outDir": "./dist"
+    "esModuleInterop": true,
+    "outDir": "./dist",
+    "jsx": "react"
   }
 }
