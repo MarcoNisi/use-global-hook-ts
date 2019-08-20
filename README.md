@@ -55,13 +55,28 @@ const AnotherComponent = (_: any) => {
   return <span>{globalState.text}</span>
 }
 
+class ClassComponent extends React.Component<{ text: string }> {
+  render() {
+    return <span>{this.props.text}</span>
+  }
+}
+
+const HOCWithGlobalHook = (_: any) => {
+  const [globalState] = useGlobal()
+  return <ClassComponent text={globalState.text} />
+}
+
 const Wrapper = (_: any) => {
   return <>
     <ExampleComponent/>
     <AnotherComponent/>
+    <HOCWithGlobalHook/>
   </>
 }
 ```
+
+### Class component
+You can use this package also with class components wrapping them into a HOC Component.
 
 ### TODO
 - Rerender components based only on the slice of the App state that is used;
