@@ -6,19 +6,23 @@ export interface IStore {
   debug: boolean
 }
 
-function deepUpdate(oldState: any, changes: any) {
-	for (const prop in oldState) {
-    if (typeof changes[prop] === 'object') {
-      oldState[prop] = deepUpdate(oldState[prop], changes[prop])
-    } else if (changes.hasOwnProperty(prop)) {
-      oldState[prop] = changes[prop]
-    }
+function deepUpdate(oldObject: any, changes: any) {
+	for (const prop in changes) {
+	  try {
+	    if ( changes[prop].constructor === Object) {
+	      oldObject[prop] = deepUpdate(oldObject[prop], changes[prop])
+	    } else if (oldObject.hasOwnProperty(prop)) {
+	      oldObject[prop] = changes[prop]
+	    }
+	  } catch(e) {
+	    oldObject[prop] = changes[prop]
+	  }
 	}
-	return oldState
+	return oldObject
 }
 
 function cloneDeep(oldObject: any) {
-	let newObject: any = {}
+	let newObject: any = Array.isArray(oldObject) ? [] : {}
 	for (const prop in oldObject) {
     if (typeof oldObject[prop] === 'object') {
       newObject[prop] = cloneDeep(oldObject[prop])
