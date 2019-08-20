@@ -6,9 +6,24 @@ export interface IStore {
   debug: boolean
 }
 
+function deepUpdate(oldState: any, changes: any) {
+	for (var prop in oldState) {
+	  try {
+	    if (changes[prop].constructor === Object) {
+	      oldState[prop] = deepUpdate(oldState[prop], changes[prop])
+	    } else if (oldState.hasOwnProperty(prop)) {
+	      oldState[prop] = changes[prop]
+	    }
+	  } catch(e) {
+	    oldState[prop] = changes[prop]
+	  }
+	}
+	return oldState
+}
+
 function setState(this: IStore, changes: any) {
   const oldState = { ...this.state }
-  this.state = { ...oldState, ...changes }
+  this.state = deepUpdate(oldState, changes)
   if (this.debug) {
     console.group('STATE CHANGE')
     console.log('%c OLD STATE', 'color: grey; font-weight: bold;', oldState)
