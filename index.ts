@@ -25,7 +25,7 @@ function deepUpdate(oldState: any, changes: any) {
 
 function setState(this: IStore, changes: any) {
   const oldState = cloneDeep(this.state)
-  this.state = deepUpdate(oldState, changes)
+  this.state = deepUpdate({ ...this.state }, changes)
   if (this.debug) {
     console.group('STATE CHANGE')
     console.log('%c OLD STATE', 'color: grey; font-weight: bold;', oldState)
