@@ -1,4 +1,4 @@
-# use-global-hook
+# use-global-hook-ts
 State management for React using Hooks with Typescript.
 
 ### Requirements
