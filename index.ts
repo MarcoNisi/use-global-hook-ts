@@ -1,3 +1,5 @@
+import cloneDeep from 'clone-deep'
+
 export interface IStore {
   state: any
   setState: (changes: any) => void
@@ -22,7 +24,7 @@ function deepUpdate(oldState: any, changes: any) {
 }
 
 function setState(this: IStore, changes: any) {
-  const oldState = { ...this.state }
+  const oldState = cloneDeep(this.state)
   this.state = deepUpdate(oldState, changes)
   if (this.debug) {
     console.group('STATE CHANGE')
