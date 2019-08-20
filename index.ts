@@ -1,5 +1,3 @@
-import cloneDeep from 'clone-deep'
-
 export interface IStore {
   state: any
   setState: (changes: any) => void
@@ -9,18 +7,26 @@ export interface IStore {
 }
 
 function deepUpdate(oldState: any, changes: any) {
-	for (var prop in oldState) {
-	  try {
-	    if (changes[prop].constructor === Object) {
-	      oldState[prop] = deepUpdate(oldState[prop], changes[prop])
-	    } else if (oldState.hasOwnProperty(prop)) {
-	      oldState[prop] = changes[prop]
-	    }
-	  } catch(e) {
-	    oldState[prop] = changes[prop]
-	  }
+	for (const prop in oldState) {
+    if (typeof changes[prop] === 'object') {
+      oldState[prop] = deepUpdate(oldState[prop], changes[prop])
+    } else if (changes.hasOwnProperty(prop)) {
+      oldState[prop] = changes[prop]
+    }
 	}
 	return oldState
+}
+
+function cloneDeep(oldObject: any) {
+	let newObject: any = {}
+	for (const prop in oldObject) {
+    if (typeof oldObject[prop] === 'object') {
+      newObject[prop] = cloneDeep(oldObject[prop])
+    } else {
+      newObject[prop] = oldObject[prop]
+    }
+	}
+	return newObject
 }
 
 function setState(this: IStore, changes: any) {
