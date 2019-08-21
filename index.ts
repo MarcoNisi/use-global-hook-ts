@@ -7,30 +7,47 @@ export interface IStore {
 }
 
 function deepUpdate(oldObject: any, changes: any) {
-	for (const prop in changes) {
-	  try {
-	    if ( changes[prop].constructor === Object) {
-	      oldObject[prop] = deepUpdate(oldObject[prop], changes[prop])
-	    } else if (oldObject.hasOwnProperty(prop)) {
-	      oldObject[prop] = changes[prop]
-	    }
-	  } catch(e) {
-	    oldObject[prop] = changes[prop]
-	  }
-	}
-	return oldObject
+  for (const prop in changes) {
+    try {
+      if (changes[prop].constructor === Object) {
+        oldObject[prop] = deepUpdate(oldObject[prop], changes[prop])
+      } else if (oldObject.hasOwnProperty(prop)) {
+        oldObject[prop] = changes[prop]
+      }
+    } catch (e) {
+      oldObject[prop] = changes[prop]
+    }
+  }
+  return oldObject
+}
+
+function shouldUpdate(listenedTree: any, changes: any): boolean {
+  if (!listenedTree) return true
+  return Object.keys(listenedTree).some((k: string) => {
+    if (!(k in changes)) {
+      return false
+    }
+    if (listenedTree[k] && typeof listenedTree[k] === 'object' &&
+      changes[k] && typeof changes[k] === 'object') {
+      return shouldUpdate(listenedTree[k], changes[k])
+    }
+    if (listenedTree[k] === null) {
+      return true
+    }
+    return false
+  })
 }
 
 function cloneDeep(oldObject: any) {
-	let newObject: any = Array.isArray(oldObject) ? [] : {}
-	for (const prop in oldObject) {
+  let newObject: any = Array.isArray(oldObject) ? [] : {}
+  for (const prop in oldObject) {
     if (typeof oldObject[prop] === 'object') {
       newObject[prop] = cloneDeep(oldObject[prop])
     } else {
       newObject[prop] = oldObject[prop]
     }
-	}
-	return newObject
+  }
+  return newObject
 }
 
 function setState(this: IStore, changes: any) {
@@ -44,21 +61,23 @@ function setState(this: IStore, changes: any) {
     console.groupEnd()
   }
   this.listeners.forEach((listener: any) => {
-    listener(this.state)
+    if (shouldUpdate(listener.listenedTree, changes)) {
+      listener.action(this.state)
+    }
   })
   localStorage.setItem('storedState', JSON.stringify(this.state))
 }
 
-function useCustom(this: IStore, React: any): [any, any] {
-  const newListener = React.useState()[1]
+function useCustom(this: IStore, React: any, listenedTree: any): [any, any] {
+  const newAction = React.useState()[1]
   React.useEffect(() => {
-    this.listeners.push(newListener)
+    this.listeners.push({ action: newAction, listenedTree })
     return () => {
       this.listeners = this.listeners.filter(
-        (listener: any) => listener !== newListener
+        (listener: any) => listener.action !== newAction
       )
     }
-  }, [newListener])
+  }, [newAction])
   return [this.state, this.actions]
 }
 
@@ -96,12 +115,12 @@ const useGlobalHook = <S>(
   actions: any,
   persist = false,
   debug = false
-): (() => [S, any]) => {
+): ((listenedTree?: any) => [S, any]) => {
   const store: IStore = { state: initialState, listeners: [], debug, setState, actions }
   store.setState = setState.bind(store)
   store.actions = associateActions(store, actions)
   if (persist) store.setState(initializer(store))
-  return useCustom.bind(store, React)
+  return (listenedTree?: any) => useCustom.bind(store, React, listenedTree)()
 }
 
 export default useGlobalHook
