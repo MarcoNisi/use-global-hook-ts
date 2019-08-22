@@ -6,6 +6,16 @@ export interface IStore {
   debug: boolean
 }
 
+export type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends Array<infer U>
+    ? Array<DeepPartial<U>>
+    : T[P] extends ReadonlyArray<infer U>
+    ? ReadonlyArray<DeepPartial<U>>
+    : DeepPartial<T[P]> extends object
+    ? DeepPartial<T[P]>
+    : boolean
+}
+
 function deepUpdate(oldObject: any, changes: any) {
   for (const prop in changes) {
     try {
@@ -27,11 +37,15 @@ function shouldUpdate(listenedTree: any, changes: any): boolean {
     if (!(k in changes)) {
       return false
     }
-    if (listenedTree[k] && typeof listenedTree[k] === 'object' &&
-      changes[k] && typeof changes[k] === 'object') {
+    if (
+      listenedTree[k] &&
+      typeof listenedTree[k] === 'object' &&
+      changes[k] &&
+      typeof changes[k] === 'object'
+    ) {
       return shouldUpdate(listenedTree[k], changes[k])
     }
-    if (listenedTree[k] === null) {
+    if (listenedTree[k] === true) {
       return true
     }
     return false
@@ -115,12 +129,19 @@ const useGlobalHook = <S>(
   actions: any,
   persist = false,
   debug = false
-): ((listenedTree?: any) => [S, any]) => {
-  const store: IStore = { state: initialState, listeners: [], debug, setState, actions }
+): ((listenedTree?: DeepPartial<S>) => [S, any]) => {
+  const store: IStore = {
+    state: initialState,
+    listeners: [],
+    debug,
+    setState,
+    actions
+  }
   store.setState = setState.bind(store)
   store.actions = associateActions(store, actions)
   if (persist) store.setState(initializer(store))
-  return (listenedTree?: any) => useCustom.bind(store, React, listenedTree)()
+  return (listenedTree?: DeepPartial<S>) =>
+    useCustom.bind(store, React, listenedTree)()
 }
 
 export default useGlobalHook
