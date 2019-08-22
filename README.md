@@ -92,4 +92,5 @@ const Wrapper = (_: any) => {
 - Improve typings;
 - Allow ```changes``` as ```setState``` parameter that match the type of app state;
 - Improve Docs;
-- Persist only slices of state defined by user (a.k.a. redux-persist).
+- Persist only slices of state defined by user (a.k.a. redux-persist);
+- Reduce number of rerender.

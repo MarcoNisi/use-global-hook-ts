@@ -8,11 +8,11 @@ export interface IStore {
 
 export type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer U>
-    ? Array<DeepPartial<U>>
+    ? Array<DeepPartial<U>> | boolean
     : T[P] extends ReadonlyArray<infer U>
-    ? ReadonlyArray<DeepPartial<U>>
+    ? ReadonlyArray<DeepPartial<U>> | boolean
     : DeepPartial<T[P]> extends object
-    ? DeepPartial<T[P]>
+    ? DeepPartial<T[P]> | boolean
     : boolean
 }
 
