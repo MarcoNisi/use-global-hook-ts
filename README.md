@@ -14,7 +14,7 @@ The method ```useGlobalHook``` accept five paramters:
 1. ```React```: Your instance of React;
 2. ```initialState```: the initial state of your app;
 3. ```actions```: an object of any structure with the methods to change the state of app;
-4. ```persist```: if ```true```, the state will be saved in localStorage and refilled from it on page reload;
+4. ```persistTree```: a subset of app state's keys with boolean value that will be saved and auto refilled on page reload;
 5. ```debug```: if ```true``` each action that change the state of app will be logged in console.
 
 Each ```action``` receive as first parameter the ```Store```. With this store you can use the method ```setState``` in order to change the app state and you can also read the latter using the property ```state``` of the store.
@@ -40,12 +40,12 @@ const initialState: IAppState = {
 }
 
 const actions = {
-  changeText: (store: IStore, newText: string) => {
+  changeText: (store: IStore<IAppState>, newText: string) => {
     store.setState({ text: newText })
   }
 }
 
-const useGlobal = useGlobalHook(React, initialState, actions, false, true)
+const useGlobal = useGlobalHook(React, initialState, actions, null, true)
 
 const ExampleComponent = (_: any) => {
   const [globalState, globalActions] = useGlobal()
@@ -88,9 +88,8 @@ const Wrapper = (_: any) => {
 }
 ```
 
+### For any question or request, feel free to open an issue on Github!
+
 ### TODO
-- Improve typings;
-- Allow ```changes``` as ```setState``` parameter that match the type of app state;
 - Improve Docs;
-- Persist only slices of state defined by user (a.k.a. redux-persist);
 - Reduce number of rerender.
