@@ -4,7 +4,7 @@ export interface IStore<S> {
   listeners: any[]
   actions: any
   debug: boolean,
-  persistTree: DeepBoolPartial<S> | null
+  persistTree: DeepBoolPartial<S> | boolean
 }
 
 export type DeepBoolPartial<T> = {
