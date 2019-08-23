@@ -1,4 +1,4 @@
-import { IStore, DeepPartial, DeepBoolPartial } from './interfaces'
+import { IStore, DeepPartial, DeepBoolPartial, Listener } from './interfaces'
 import { cloneDeep, deepUpdate, shouldUpdate, overlap } from './utils'
 
 const localStorageKey = 'useGlobalHookTs__storedState'
@@ -13,24 +13,24 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
     console.log('%c NEW STATE', 'color: green; font-weight: bold;', this.state)
     console.groupEnd()
   }
-  this.listeners.forEach((listener: any) => {
+  this.listeners.forEach((listener: Listener<S>) => {
     if (shouldUpdate(listener.listenedTree, changes)) {
-      listener.action(this.state)
+      listener.setState(this.state)
     }
   })
   localStorage.setItem(localStorageKey, JSON.stringify(this.state))
 }
 
 function useCustom<S>(this: IStore<S>, React: any, listenedTree: DeepBoolPartial<S>): [any, any] {
-  const newAction = React.useState()[1]
+  const newSetState = React.useState()[1]
   React.useEffect(() => {
-    this.listeners.push({ action: newAction, listenedTree })
+    this.listeners.push({ action: newSetState, listenedTree })
     return () => {
       this.listeners = this.listeners.filter(
-        (listener: any) => listener.action !== newAction
+        (listener: Listener<S>) => listener.setState !== newSetState
       )
     }
-  }, [newAction])
+  }, [newSetState])
   return [this.state, this.actions]
 }
 
