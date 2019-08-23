@@ -2,7 +2,7 @@ export interface IStore<S> {
   state: S
   setState: (changes: DeepPartial<S>) => void
   listeners: any[]
-  actions: any[]
+  actions: any
   debug: boolean
 }
 
@@ -24,4 +24,9 @@ export type DeepPartial<T> = {
     : DeepPartial<T[P]> extends object
     ? DeepPartial<T[P]>
     : T[P]
+}
+
+export interface Listener<S> {
+  listenedTree: DeepBoolPartial<S>
+  setState: any
 }
