@@ -1,7 +1,15 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { act } from 'react-dom/test-utils'
-import useGlobalHook, { IStore } from './index'
+import useGlobalHook from './lib'
+import { IStore } from './interfaces'
+
+
+interface IAppState {
+  text: string,
+  anotherText: string,
+  data: string
+}
 
 const initialState = {
   text: 'ABC',
@@ -10,15 +18,15 @@ const initialState = {
 }
 
 const actions = {
-  changeText: (store: IStore, newText: string) => {
+  changeText: (store: IStore<IAppState>, newText: string) => {
     store.setState({ text: newText })
   },
-  changeAnotherText: (store: IStore, newText: string) => {
+  changeAnotherText: (store: IStore<IAppState>, newText: string) => {
     store.setState({ anotherText: newText })
   }
 }
 
-const useGlobal = useGlobalHook(React, initialState, actions)
+const useGlobal = useGlobalHook(React, initialState, actions, { text: true })
 
 const TestComponent = (props: { newText: string }) => {
   const [globalState, globalActions] = useGlobal({
@@ -27,10 +35,12 @@ const TestComponent = (props: { newText: string }) => {
   const onClick = () => {
     globalActions.changeText(props.newText)
   }
-  return <>
-    <span>{globalState.text}</span>
-    <button onClick={onClick}>Click</button>
-  </>
+  return (
+    <>
+      <span>{globalState.text}</span>
+      <button onClick={onClick}>Click</button>
+    </>
+  )
 }
 const NotUpdatedComponent = (props: { newText: string }) => {
   const [globalState, globalActions] = useGlobal({
@@ -39,10 +49,12 @@ const NotUpdatedComponent = (props: { newText: string }) => {
   const onClick = () => {
     globalActions.changeAnotherText(props.newText)
   }
-  return <>
-    <span>{globalState.anotherText}</span>
-    <button onClick={onClick}>Click</button>
-  </>
+  return (
+    <>
+      <span>{globalState.anotherText}</span>
+      <button onClick={onClick}>Click</button>
+    </>
+  )
 }
 let container: any
 
@@ -58,7 +70,7 @@ afterEach(() => {
 
 describe('Button component', () => {
   test('It shows the expected text when clicked', () => {
-    const a = <TestComponent newText='New text'/>
+    const a = <TestComponent newText='New text' />
     act(() => {
       ReactDOM.render(a, container)
     })
@@ -71,7 +83,7 @@ describe('Button component', () => {
     expect(span.textContent).toBe('New text')
   })
   test('It should not update', () => {
-    const a = <NotUpdatedComponent newText='New text'/>
+    const a = <NotUpdatedComponent newText='New text' />
     act(() => {
       ReactDOM.render(a, container)
     })
