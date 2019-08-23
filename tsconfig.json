@@ -11,6 +11,5 @@
     "esModuleInterop": true,
     "outDir": "./dist",
     "jsx": "react"
-  },
-  "include": ["index.ts"]
+  }
 }
