@@ -18,7 +18,10 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
       listener.setState(this.state)
     }
   })
-  localStorage.setItem(localStorageKey, JSON.stringify(this.state))
+  if (this.persistTree) {
+    const toBeStored = overlap(this.state, this.persistTree)
+    localStorage.setItem(localStorageKey, JSON.stringify(toBeStored))
+  }
 }
 
 function useCustom<S>(this: IStore<S>, React: any, listenedTree: DeepBoolPartial<S>): [any, any] {
@@ -75,7 +78,8 @@ const useGlobalHook = <S>(
     listeners: [],
     debug,
     setState,
-    actions
+    actions,
+    persistTree
   }
   store.setState = setState.bind(store)
   store.actions = associateActions(store, actions)

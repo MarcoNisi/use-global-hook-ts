@@ -3,7 +3,8 @@ export interface IStore<S> {
   setState: (changes: DeepPartial<S>) => void
   listeners: any[]
   actions: any
-  debug: boolean
+  debug: boolean,
+  persistTree: DeepBoolPartial<S> | null
 }
 
 export type DeepBoolPartial<T> = {
