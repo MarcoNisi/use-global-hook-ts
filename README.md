@@ -2,7 +2,7 @@
 State management for React using Hooks with Typescript.
 
 ### Requirements
-This library need React and ReactDOM as peer dependencies with a version greater than 16.8 because Hooks have been introduced in that version.
+This library needs React and ReactDOM as peer dependencies with a version greater than 16.8 because Hooks have been introduced in that version.
 
 ### Installation
 ```
