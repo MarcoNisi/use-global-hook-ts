@@ -14,7 +14,7 @@ The method ```useGlobalHook``` accept five paramters:
 1. ```React```: Your instance of React;
 2. ```initialState```: the initial state of your app;
 3. ```actions```: an object of any structure with the methods to change the state of app;
-4. ```persistTree```: a subset of app state's keys with boolean value that will be saved and auto refilled on page reload;
+4. ```persistTree```: a subset of app state's keys with boolean value that will be saved and auto refilled on page reload OR ```true``` if you want to save all the state OR ```false``` if you want to save nothing;
 5. ```debug```: if ```true``` each action that change the state of app will be logged in console.
 
 Each ```action``` receive as first parameter the ```Store```. With this store you can use the method ```setState``` in order to change the app state and you can also read the latter using the property ```state``` of the store.
@@ -45,7 +45,7 @@ const actions = {
   }
 }
 
-const useGlobal = useGlobalHook(React, initialState, actions, null, true)
+const useGlobal = useGlobalHook(React, initialState, actions, false, true)
 
 const ExampleComponent = (_: any) => {
   const [globalState, globalActions] = useGlobal()

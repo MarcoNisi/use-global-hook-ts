@@ -19,7 +19,7 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
     }
   })
   if (this.persistTree) {
-    const toBeStored = overlap(this.state, this.persistTree)
+    const toBeStored = this.persistTree === true ? this.state : overlap(this.state, this.persistTree)
     localStorage.setItem(localStorageKey, JSON.stringify(toBeStored))
   }
 }
@@ -50,12 +50,15 @@ const associateActions = <S>(store: IStore<S>, actions: any) => {
   return associatedActions
 }
 
-const initializer = <S>(store: IStore<S>, persistTree: DeepBoolPartial<S>): DeepPartial<S> => {
+const initializer = <S>(store: IStore<S>, persistTree: DeepBoolPartial<S> | boolean): DeepPartial<S> => {
   try {
     const storedState = localStorage.getItem(localStorageKey)
     if (storedState) {
       const parsedStoredState = JSON.parse(storedState)
-      const filteredState = overlap(parsedStoredState, persistTree)
+      let filteredState = {}
+      if (persistTree) {
+        filteredState = persistTree === true ? parsedStoredState : overlap(parsedStoredState, persistTree)
+      }
       return {
         ...store.state,
         ...filteredState
@@ -70,7 +73,7 @@ const useGlobalHook = <S>(
   React: any,
   initialState: S,
   actions: any,
-  persistTree: null | DeepBoolPartial<S> = null,
+  persistTree: boolean | DeepBoolPartial<S> = false,
   debug = false
 ): ((listenedTree?: DeepBoolPartial<S>) => [S, any]) => {
   const store: IStore<S> = {
