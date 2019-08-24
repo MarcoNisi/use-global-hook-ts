@@ -91,5 +91,4 @@ const Wrapper = (_: any) => {
 ### For any question or request, feel free to open an issue on Github!
 
 ### TODO
-- Improve Docs;
-- Reduce number of rerender.
+- Improve Docs

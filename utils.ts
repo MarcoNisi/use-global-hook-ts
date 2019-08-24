@@ -51,3 +51,12 @@ export const cloneDeep = (oldObject: any) => {
   }
   return newObject
 }
+
+export const debounce = (func: any, wait = 100) => {
+  let timeoutId: number
+  return function (this: any, ...args: any[]) {
+    const next = () => func.apply(this, args)
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(next, wait)
+  }
+}

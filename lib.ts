@@ -1,7 +1,11 @@
 import { IStore, DeepPartial, DeepBoolPartial, Listener } from './interfaces'
-import { cloneDeep, deepUpdate, shouldUpdate, overlap } from './utils'
+import { cloneDeep, deepUpdate, shouldUpdate, overlap, debounce } from './utils'
 
 const localStorageKey = 'useGlobalHookTs__storedState'
+
+const debouncedSetItem = debounce(<S>(toBeStored: DeepPartial<S>) => {
+  localStorage.setItem(localStorageKey, JSON.stringify(toBeStored))
+}, 500)
 
 function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
   const oldState = cloneDeep(this.state)
@@ -20,7 +24,7 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
   })
   if (this.persistTree) {
     const toBeStored = this.persistTree === true ? this.state : overlap(this.state, this.persistTree)
-    localStorage.setItem(localStorageKey, JSON.stringify(toBeStored))
+    debouncedSetItem(toBeStored)
   }
 }
 
