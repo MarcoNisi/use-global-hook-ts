@@ -21,6 +21,11 @@ Each ```action``` receive as first parameter the ```Store```. With this store yo
 
 When call ```useGlobal``` inside a component you can pass an object with a sub set of app state's keys with boolean value. The component will be updated only when the sub set of app state will change (see Example).
 
+```useGlobal``` return three elements when is called inside a component:
+1. ```globalState```: last version of the app state;
+2. ```globalActions```: actions that can be called in order to change the app state;
+3. ```lastChanges```: last changes made on the app state (```null``` if no changes are made yet). 
+
 The app state is **immutable** (by Object.freeze) in order to guarantee that any component can't change it without using the actions.
 
 ### Class component
@@ -50,13 +55,13 @@ const actions = {
 const useGlobal = useGlobalHook(React, initialState, actions, false, true)
 
 const ExampleComponent = (_: any) => {
-  const [globalState, globalActions] = useGlobal()
+  const [globalState, globalActions, lastChanges] = useGlobal()
   React.useEffect(() => {
     setTimeout(() => {
       globalActions.changeText('New text')
     }, 1000)
   }, [globalActions])
-  console.log('ExampleComponent render')
+  console.log('ExampleComponent render. Last changes', lastChanges)
   return <span>{globalState.text}</span>
 }
 

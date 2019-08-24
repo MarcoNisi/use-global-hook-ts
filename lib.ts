@@ -10,6 +10,7 @@ const debouncedSetItem = debounce(<S>(toBeStored: DeepPartial<S>) => {
 function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
   const oldState = cloneDeep(this.state)
   this.state = Object.freeze(deepUpdate({ ...this.state }, changes))
+  this.lastChanges = changes
   if (this.debug) {
     console.group('STATE CHANGE')
     console.log('%c OLD STATE', 'color: grey; font-weight: bold;', oldState)
@@ -28,7 +29,7 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
   }
 }
 
-function useListener<S>(this: IStore<S>, React: any, listenedTree: DeepBoolPartial<S>): [any, any] {
+function useListener<S>(this: IStore<S>, React: any, listenedTree: DeepBoolPartial<S>): [any, any, any] {
   const newSetState = React.useState()[1]
   React.useEffect(() => {
     this.listeners.push({ setState: newSetState, listenedTree })
@@ -38,7 +39,8 @@ function useListener<S>(this: IStore<S>, React: any, listenedTree: DeepBoolParti
       )
     }
   }, [newSetState])
-  return [this.state, this.actions]
+  const lastChanges = this.lastChanges ? overlap(this.lastChanges, listenedTree) : null
+  return [this.state, this.actions, lastChanges]
 }
 
 const associateActions = <S>(store: IStore<S>, actions: any) => {
@@ -79,14 +81,15 @@ const useGlobalHook = <S>(
   actions: any,
   persistTree: boolean | DeepBoolPartial<S> = false,
   debug = false
-): ((listenedTree?: DeepBoolPartial<S>) => [S, any]) => {
+): ((listenedTree?: DeepBoolPartial<S>) => [S, any, DeepPartial<S>]) => {
   const store: IStore<S> = {
     state: initialState,
     listeners: [],
     debug,
     setState,
     actions,
-    persistTree
+    persistTree,
+    lastChanges: null
   }
   store.setState = setState.bind(store)
   store.actions = associateActions(store, actions)
