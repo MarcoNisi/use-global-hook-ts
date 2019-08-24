@@ -9,7 +9,7 @@ const debouncedSetItem = debounce(<S>(toBeStored: DeepPartial<S>) => {
 
 function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
   const oldState = cloneDeep(this.state)
-  this.state = deepUpdate({ ...this.state }, changes)
+  this.state = Object.freeze(deepUpdate({ ...this.state }, changes))
   if (this.debug) {
     console.group('STATE CHANGE')
     console.log('%c OLD STATE', 'color: grey; font-weight: bold;', oldState)

@@ -21,6 +21,8 @@ Each ```action``` receive as first parameter the ```Store```. With this store yo
 
 When call ```useGlobal``` inside a component you can pass an object with a sub set of app state's keys with boolean value. The component will be updated only when the sub set of app state will change (see Example).
 
+The app state is **immutable** (by Object.freeze) in order to guarantee that any component can't change it without using the actions.
+
 ### Class component
 You can use this package also with class components wrapping them into a HOC Component (see Example).
 
