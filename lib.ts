@@ -18,7 +18,7 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
     console.groupEnd()
   }
   this.listeners.forEach((listener: Listener<S>) => {
-    if (shouldUpdate(listener.listenedTree, changes)) {
+    if (shouldUpdate<DeepBoolPartial<S>>(listener.listenedTree, changes)) {
       listener.setState(this.state)
     }
   })
@@ -28,7 +28,7 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
   }
 }
 
-function useCustom<S>(this: IStore<S>, React: any, listenedTree: DeepBoolPartial<S>): [any, any] {
+function useListener<S>(this: IStore<S>, React: any, listenedTree: DeepBoolPartial<S>): [any, any] {
   const newSetState = React.useState()[1]
   React.useEffect(() => {
     this.listeners.push({ setState: newSetState, listenedTree })
@@ -91,7 +91,7 @@ const useGlobalHook = <S>(
   store.setState = setState.bind(store)
   store.actions = associateActions(store, actions)
   if (persistTree) store.setState(initializer<S>(store, persistTree))
-  return (listenedTree?: DeepBoolPartial<S>) => useCustom.bind(store, React, listenedTree)()
+  return (listenedTree?: DeepBoolPartial<S>) => useListener.bind(store, React, listenedTree)()
 }
 
 export default useGlobalHook

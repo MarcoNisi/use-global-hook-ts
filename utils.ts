@@ -1,3 +1,5 @@
+import { DeepPartial } from './interfaces'
+
 export const deepUpdate = (oldObject: any, changes: any) => {
   for (const prop in changes) {
     try {
@@ -35,7 +37,7 @@ export const overlap = (primary: any, secondary: any): any => {
   }))
 }
 
-export const shouldUpdate = (listenedTree: any, changes: any): boolean => {
+export const shouldUpdate = <S>(listenedTree: S, changes: DeepPartial<S>): boolean => {
   const commonKeys = overlap(changes, listenedTree)
   return Object.keys(commonKeys).length > 0
 }
