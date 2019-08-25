@@ -155,6 +155,7 @@ const Wrapper = (_: any) => {
 ### TODO
 - Improve Docs;
 - Add expiration for persist;
+- Add more tests;
 
 ### Donation
 If this project help you reduce time to develop, you can give me [a cup of coffee :)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=JXTSP4WPLJRUG&source=url)
