@@ -1,4 +1,4 @@
-import { IStore, DeepPartial, DeepBoolPartial, Listener } from './interfaces'
+import { IStore, DeepPartial, DeepBoolPartial, Listener, IStoreOptions } from './interfaces'
 import { cloneDeep, deepUpdate, shouldUpdate, overlap, debounce } from './utils'
 
 const localStorageKey = 'useGlobalHookTs__storedState'
@@ -11,7 +11,7 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
   const oldState = cloneDeep(this.state)
   this.state = Object.freeze(deepUpdate({ ...this.state }, changes))
   this.lastChanges = changes
-  if (this.debug) {
+  if (this.options.debug) {
     console.group('STATE CHANGE')
     console.log('%c OLD STATE', 'color: grey; font-weight: bold;', oldState)
     console.log('%c CHANGES', 'color: blue; font-weight: bold;', changes)
@@ -23,8 +23,8 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
       listener.setState(this.state)
     }
   })
-  if (this.persistTree) {
-    const toBeStored = this.persistTree === true ? this.state : overlap(this.state, this.persistTree)
+  if (this.options.persistTree) {
+    const toBeStored = this.options.persistTree === true ? this.state : overlap(this.state, this.options.persistTree)
     debouncedSetItem(toBeStored)
   }
 }
@@ -56,14 +56,14 @@ const associateActions = <S>(store: IStore<S>, actions: any) => {
   return associatedActions
 }
 
-const initializer = <S>(store: IStore<S>, persistTree: DeepBoolPartial<S> | boolean): DeepPartial<S> => {
+const initializer = <S>(store: IStore<S>): DeepPartial<S> => {
   try {
     const storedState = localStorage.getItem(localStorageKey)
     if (storedState) {
       const parsedStoredState = JSON.parse(storedState)
       let filteredState = {}
-      if (persistTree) {
-        filteredState = persistTree === true ? parsedStoredState : overlap(parsedStoredState, persistTree)
+      if (store.options.persistTree) {
+        filteredState = store.options.persistTree === true ? parsedStoredState : overlap(parsedStoredState, store.options.persistTree)
       }
       return {
         ...store.state,
@@ -79,21 +79,23 @@ const useGlobalHook = <S>(
   React: any,
   initialState: S,
   actions: any,
-  persistTree: boolean | DeepBoolPartial<S> = false,
-  debug = false
+  options?: IStoreOptions<S>
 ): ((listenedTree?: DeepBoolPartial<S>) => [S, any, DeepPartial<S>]) => {
+  const defaultOptions: IStoreOptions<S> = {
+    debug: true,
+    persistTree: false
+  }
   const store: IStore<S> = {
     state: initialState,
     listeners: [],
-    debug,
     setState,
     actions,
-    persistTree,
-    lastChanges: null
+    lastChanges: null,
+    options: options ? { ...defaultOptions, ...options } : defaultOptions
   }
   store.setState = setState.bind(store)
   store.actions = associateActions(store, actions)
-  if (persistTree) store.setState(initializer<S>(store, persistTree))
+  if (store.options.persistTree) store.setState(initializer<S>(store))
   return (listenedTree?: DeepBoolPartial<S>) => useListener.bind(store, React, listenedTree)()
 }
 

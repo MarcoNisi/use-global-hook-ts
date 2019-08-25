@@ -18,7 +18,8 @@
     "hooks",
     "state",
     "management",
-    "typescript"
+    "typescript",
+    "react-native"
   ],
   "author": "Marco Nisi",
   "license": "GPL-3.0-or-later",

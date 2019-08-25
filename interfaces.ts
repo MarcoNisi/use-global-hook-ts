@@ -2,10 +2,14 @@ export interface IStore<S> {
   state: S
   setState: (changes: DeepPartial<S>) => void
   listeners: any[]
-  actions: any
-  debug: boolean,
-  persistTree: DeepBoolPartial<S> | boolean,
-  lastChanges: DeepPartial<S> | null
+  actions: any,
+  lastChanges: DeepPartial<S> | null,
+  options: IStoreOptions<S>
+}
+
+export interface IStoreOptions<S> {
+  debug?: boolean,
+  persistTree?: DeepBoolPartial<S> | boolean
 }
 
 export type DeepBoolPartial<T> = {
