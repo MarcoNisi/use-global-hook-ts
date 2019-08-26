@@ -2,12 +2,13 @@ import { IStore, DeepPartial, DeepBoolPartial, Listener, IStoreOptions } from '.
 import { cloneDeep, deepUpdate, shouldUpdate, overlap, debounce } from './utils'
 
 const localStorageKey = 'useGlobalHookTs__storedState'
+const maxUndoable = 5
 
 const debouncedSetItem = debounce(<S>(toBeStored: DeepPartial<S>) => {
   localStorage.setItem(localStorageKey, JSON.stringify(toBeStored))
 }, 500)
 
-function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
+function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isUndo: boolean = false, isRedo: boolean = false) {
   const oldState = cloneDeep(this.state)
   this.state = Object.freeze(deepUpdate({ ...this.state }, changes))
   this.lastChanges = changes
@@ -27,6 +28,18 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>) {
     const toBeStored = this.options.persistTree === true ? this.state : overlap(this.state, this.options.persistTree)
     debouncedSetItem(toBeStored)
   }
+  if (this.options.undoable) {
+      if (!isUndo) {
+        this.past = [...this.past, oldState]
+        if (!isRedo) {
+          this.future = []
+        }
+      }
+  }
+  /*const _maxUndoable = this.options.maxUndoable || maxUndoable
+  if (this.past.length > _maxUndoable) {
+    this.past.unshift()
+  }*/
 }
 
 function useListener<S>(this: IStore<S>, React: any, listenedTree: DeepBoolPartial<S>): [any, any, any] {
@@ -43,6 +56,30 @@ function useListener<S>(this: IStore<S>, React: any, listenedTree: DeepBoolParti
   return [this.state, this.actions, lastChanges]
 }
 
+const makeUndo = <S>(store: IStore<S>) => {
+  return () => {
+    const previous = store.past[store.past.length - 1]
+    if (previous) {
+      const newPast = store.past.slice(0, store.past.length - 1)
+      store.future = [store.state, ...store.future]
+      store.past = newPast
+      store.setState(previous, true)
+    }
+  }
+}
+
+const makeRedo = <S>(store: IStore<S>) => {
+  return () => {
+    const next = store.future[0]
+    if (next) {
+      const newFuture = store.future.slice(1)
+      store.past = [...store.past, store.state]
+      store.future = newFuture
+      store.setState(next, false, true)
+    }
+  }
+}
+
 const associateActions = <S>(store: IStore<S>, actions: any) => {
   const associatedActions: any = {}
   Object.keys(actions).forEach(key => {
@@ -53,6 +90,8 @@ const associateActions = <S>(store: IStore<S>, actions: any) => {
       associatedActions[key] = associateActions(store, actions[key])
     }
   })
+  associatedActions.undo = makeUndo(store)
+  associatedActions.redo = makeRedo(store)
   return associatedActions
 }
 
@@ -83,10 +122,14 @@ const useGlobalHook = <S>(
 ): ((listenedTree?: DeepBoolPartial<S>) => [S, any, DeepPartial<S>]) => {
   const defaultOptions: IStoreOptions<S> = {
     debug: true,
-    persistTree: false
+    persistTree: false,
+    undoable: false,
+    maxUndoable
   }
   const store: IStore<S> = {
     state: initialState,
+    future: [],
+    past: [],
     listeners: [],
     setState,
     actions,

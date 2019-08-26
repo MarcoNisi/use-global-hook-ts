@@ -26,7 +26,7 @@ const actions = {
   }
 }
 
-const useGlobal = useGlobalHook(React, initialState, actions, { debug: false })
+const useGlobal = useGlobalHook(React, initialState, actions, { debug: false, undoable: true })
 
 const TestComponent = (props: { newText: string }) => {
   const [globalState, globalActions] = useGlobal({
