@@ -67,7 +67,7 @@ With the option ```persistTree``` you can achieve almost all of what you can do 
 For example, if your app state is:
 ```ts
 const appState = {
-  someData: [1,2,3],
+  someData: [1, 2, 3],
   tmpData: 'Tmp'
 }
 ```
@@ -80,6 +80,10 @@ const persistTree = {
 
 ### Class component
 You can use this package also with class components wrapping them into a HOC Component (see Example).
+
+### Undo/Redo
+In the ```globalActions``` you'll find the actions ```undo``` and ```redo``` that you can use respectively in order to revert or reapply the last action.
+This feature will be improved in the next releases.
 
 ### React Native
 You can use this library also for React Native development but, for the moment, you will have to set ```persistTree``` option to ```false```.
@@ -156,6 +160,7 @@ const Wrapper = (_: any) => {
 - Improve Docs;
 - Add expiration for persist;
 - Add more tests;
+- Improve management of undo/redo;
 
 ### Donation
 If this project help you reduce time to develop, you can give me [a cup of coffee :)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=JXTSP4WPLJRUG&source=url)

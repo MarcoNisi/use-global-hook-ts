@@ -8,7 +8,7 @@ const debouncedSetItem = debounce(<S>(toBeStored: DeepPartial<S>) => {
   localStorage.setItem(localStorageKey, JSON.stringify(toBeStored))
 }, 500)
 
-function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isUndo: boolean = false, isRedo: boolean = false) {
+function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isFromHistory: boolean = false) {
   const oldState = cloneDeep(this.state)
   this.state = Object.freeze(deepUpdate({ ...this.state }, changes))
   this.lastChanges = changes
@@ -28,18 +28,10 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isUndo: boolean =
     const toBeStored = this.options.persistTree === true ? this.state : overlap(this.state, this.options.persistTree)
     debouncedSetItem(toBeStored)
   }
-  if (this.options.undoable) {
-      if (!isUndo) {
-        this.past = [...this.past, oldState]
-        if (!isRedo) {
-          this.future = []
-        }
-      }
+  if (this.options.undoable && !isFromHistory) {
+    this.past = [...this.past, oldState]
+    this.future = []
   }
-  /*const _maxUndoable = this.options.maxUndoable || maxUndoable
-  if (this.past.length > _maxUndoable) {
-    this.past.unshift()
-  }*/
 }
 
 function useListener<S>(this: IStore<S>, React: any, listenedTree: DeepBoolPartial<S>): [any, any, any] {
@@ -47,9 +39,7 @@ function useListener<S>(this: IStore<S>, React: any, listenedTree: DeepBoolParti
   React.useEffect(() => {
     this.listeners.push({ setState: newSetState, listenedTree })
     return () => {
-      this.listeners = this.listeners.filter(
-        (listener: Listener<S>) => listener.setState !== newSetState
-      )
+      this.listeners = this.listeners.filter((listener: Listener<S>) => listener.setState !== newSetState)
     }
   }, [newSetState])
   const lastChanges = this.lastChanges ? overlap(this.lastChanges, listenedTree) : null
@@ -61,7 +51,7 @@ const makeUndo = <S>(store: IStore<S>) => {
     const previous = store.past[store.past.length - 1]
     if (previous) {
       const newPast = store.past.slice(0, store.past.length - 1)
-      store.future = [store.state, ...store.future]
+      store.future = [cloneDeep(store.state), ...store.future]
       store.past = newPast
       store.setState(previous, true)
     }
@@ -73,9 +63,9 @@ const makeRedo = <S>(store: IStore<S>) => {
     const next = store.future[0]
     if (next) {
       const newFuture = store.future.slice(1)
-      store.past = [...store.past, store.state]
+      store.past = [...store.past, cloneDeep(store.state)]
       store.future = newFuture
-      store.setState(next, false, true)
+      store.setState(next, true)
     }
   }
 }
