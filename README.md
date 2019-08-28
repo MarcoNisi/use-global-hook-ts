@@ -17,6 +17,8 @@ The method ```useGlobalHook``` accept five paramters:
 4. ```options```: store configurations: 
     - ```persistTree```: a subset of app state's keys with boolean values that will be saved and auto refilled on page reload OR ```true``` if you want to save all the state OR ```false``` if you want to save nothing;
     - ```debug```: if ```true``` each action that change the state of app will be logged in console;
+    - ```undoable```: if ```true``` you will enable the undo/redo features;
+    - ```maxUndoable```: you can pass here the max number of undo/redo history that you want to use;
     - More options will come soon!
 
 ```ts
@@ -47,7 +49,9 @@ const useGlobal = useGlobalHook(React, initialState, actions, {
   persistTree: {
     movies: false,
     loggedUser: true
-  }
+  },
+  undoable: true,
+  maxUndoable: 10
 })
 ``` 
 
@@ -82,7 +86,8 @@ const persistTree = {
 You can use this package also with class components wrapping them into a HOC Component (see Example).
 
 ### Undo/Redo
-In the ```globalActions``` you'll find the actions ```undo``` and ```redo``` that you can use respectively in order to revert or reapply the last action.
+In the ```globalActions``` you'll find the actions ```undo``` and ```redo``` that you can use respectively in order to revert or reapply the last action. You have to pass ```undoable: true``` in the options of the store in order to use this feature.
+
 This feature will be improved in the next releases.
 
 ### React Native

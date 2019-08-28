@@ -30,6 +30,7 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isFromHistory: bo
   }
   if (this.options.undoable && !isFromHistory) {
     this.past = [...this.past, oldState]
+    cutHistory(this)
     this.future = []
   }
 }
@@ -53,7 +54,19 @@ const makeUndo = <S>(store: IStore<S>) => {
       const newPast = store.past.slice(0, store.past.length - 1)
       store.future = [cloneDeep(store.state), ...store.future]
       store.past = newPast
+      cutHistory(store)
       store.setState(previous, true)
+    }
+  }
+}
+
+const cutHistory = <S>(store: IStore<S>) => {
+  if (store.options.maxUndoable) {
+    if (store.past.length > store.options.maxUndoable) {
+      store.past.shift()
+    }
+    if (store.future.length > store.options.maxUndoable) {
+      store.past.pop()
     }
   }
 }
@@ -65,6 +78,7 @@ const makeRedo = <S>(store: IStore<S>) => {
       const newFuture = store.future.slice(1)
       store.past = [...store.past, cloneDeep(store.state)]
       store.future = newFuture
+      cutHistory(store)
       store.setState(next, true)
     }
   }
