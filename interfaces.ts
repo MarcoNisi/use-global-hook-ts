@@ -13,7 +13,8 @@ export interface IStoreOptions<S> {
   debug?: boolean,
   persistTree?: DeepBoolPartial<S> | boolean,
   undoable?: boolean,
-  maxUndoable?: number
+  maxUndoable?: number,
+  persistExp?: number
 }
 
 export type DeepBoolPartial<T> = {

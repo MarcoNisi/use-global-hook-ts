@@ -2,10 +2,12 @@ import { IStore, DeepPartial, DeepBoolPartial, Listener, IStoreOptions } from '.
 import { cloneDeep, deepUpdate, shouldUpdate, overlap, debounce } from './utils'
 
 const localStorageKey = 'useGlobalHookTs__storedState'
+const localStorageKeyExp = 'useGlobalHookTs__exp'
 const maxUndoable = 5
 
-const debouncedSetItem = debounce(<S>(toBeStored: DeepPartial<S>) => {
+const debouncedSetItem = debounce(<S>(toBeStored: DeepPartial<S>, exp: string | null) => {
   localStorage.setItem(localStorageKey, JSON.stringify(toBeStored))
+  if (exp) localStorage.setItem(localStorageKeyExp, JSON.stringify(exp))
 }, 500)
 
 function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isFromHistory: boolean = false) {
@@ -16,7 +18,7 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isFromHistory: bo
     console.group('STATE CHANGE')
     console.log('%c OLD STATE', 'color: grey; font-weight: bold;', oldState)
     console.log('%c CHANGES', 'color: blue; font-weight: bold;', changes)
-    console.log('%c NEW STATE', 'color: green; font-weight: bold;', this.state)
+    console.log('%c NEW STATE', 'color: green; font-weight: bold;', cloneDeep(this.state))
     console.groupEnd()
   }
   this.listeners.forEach((listener: Listener<S>) => {
@@ -26,7 +28,8 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isFromHistory: bo
   })
   if (this.options.persistTree) {
     const toBeStored = this.options.persistTree === true ? this.state : overlap(this.state, this.options.persistTree)
-    debouncedSetItem(toBeStored)
+    const exp = this.options.persistExp ? Date.now() + (this.options.persistExp * 1000) : null
+    debouncedSetItem(toBeStored, exp)
   }
   if (this.options.undoable && !isFromHistory) {
     this.past = [...this.past, oldState]
@@ -99,22 +102,24 @@ const associateActions = <S>(store: IStore<S>, actions: any) => {
   return associatedActions
 }
 
-const initializer = <S>(store: IStore<S>): DeepPartial<S> => {
+const initializer = <S>(store: IStore<S>) => {
   try {
     const storedState = localStorage.getItem(localStorageKey)
-    if (storedState) {
+    const exp = localStorage.getItem(localStorageKeyExp)
+    const expired = exp && exp < ('' + Date.now())
+    if (storedState && !expired) {
       const parsedStoredState = JSON.parse(storedState)
       let filteredState = {}
       if (store.options.persistTree) {
         filteredState = store.options.persistTree === true ? parsedStoredState : overlap(parsedStoredState, store.options.persistTree)
       }
-      return {
+      store.setState({
         ...store.state,
         ...filteredState
-      }
-    } else return store.state
+      })
+    }
   } catch (_) {
-    return store.state
+    return 
   }
 }
 
@@ -128,7 +133,8 @@ const useGlobalHook = <S>(
     debug: true,
     persistTree: false,
     undoable: false,
-    maxUndoable
+    maxUndoable,
+    persistExp: 0
   }
   const store: IStore<S> = {
     state: initialState,
@@ -142,7 +148,7 @@ const useGlobalHook = <S>(
   }
   store.setState = setState.bind(store)
   store.actions = associateActions(store, actions)
-  if (store.options.persistTree) store.setState(initializer<S>(store))
+  initializer<S>(store)
   return (listenedTree?: DeepBoolPartial<S>) => useListener.bind(store, React, listenedTree)()
 }
 

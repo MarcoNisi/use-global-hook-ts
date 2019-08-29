@@ -16,6 +16,7 @@ The method ```useGlobalHook``` accept five paramters:
 3. ```actions```: an object of any structure with the methods to change the state of app;
 4. ```options```: store configurations: 
     - ```persistTree```: a subset of app state's keys with boolean values that will be saved and auto refilled on page reload OR ```true``` if you want to save all the state OR ```false``` if you want to save nothing;
+    - ```persistExp```: you can pass the number of seconds after which the stored state will be discarded;
     - ```debug```: if ```true``` each action that change the state of app will be logged in console;
     - ```undoable```: if ```true``` you will enable the undo/redo features;
     - ```maxUndoable```: you can pass here the max number of undo/redo history that you want to use;
@@ -50,6 +51,7 @@ const useGlobal = useGlobalHook(React, initialState, actions, {
     movies: false,
     loggedUser: true
   },
+  persistExp: 60,
   undoable: true,
   maxUndoable: 10
 })
@@ -163,7 +165,6 @@ const Wrapper = (_: any) => {
 
 ### TODO
 - Improve Docs;
-- Add expiration for persist;
 - Add more tests;
 - Improve management of undo/redo;
 
