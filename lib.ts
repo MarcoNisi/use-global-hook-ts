@@ -112,14 +112,13 @@ const initializer = <S>(store: IStore<S>) => {
       let filteredState = {}
       if (store.options.persistTree) {
         filteredState = store.options.persistTree === true ? parsedStoredState : overlap(parsedStoredState, store.options.persistTree)
+        store.setState({
+          ...store.state,
+          ...filteredState
+        })
       }
-      store.setState({
-        ...store.state,
-        ...filteredState
-      })
     }
   } catch (_) {
-    return 
   }
 }
 

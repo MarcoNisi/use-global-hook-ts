@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import ReactDOM from 'react-dom'
 import { act } from 'react-dom/test-utils'
 import useGlobalHook from './lib'
@@ -38,7 +38,9 @@ const TestComponent = (props: { newText: string }) => {
   return (
     <>
       <span>{globalState.text}</span>
-      <button onClick={onClick}>Click</button>
+      <button onClick={onClick} id="click">Click</button>
+      <button onClick={globalActions.undo} id="undo">Undo</button>
+      <button onClick={globalActions.redo} id="redo">Redo</button>
     </>
   )
 }
@@ -58,34 +60,64 @@ const NotUpdatedComponent = (props: { newText: string }) => {
 }
 let container: any
 
-beforeEach(() => {
+beforeAll(() => {
   container = document.createElement('div')
   document.body.appendChild(container)
 })
 
-afterEach(() => {
+afterAll(() => {
   document.body.removeChild(container)
   container = null
 })
 
-describe('Button component', () => {
+describe('Test use-global-hook-ts', () => {
   test('It shows the expected text when clicked', () => {
-    const a = <TestComponent newText='New text' />
+    const component = <TestComponent newText='New text' />
     act(() => {
-      ReactDOM.render(a, container)
+      ReactDOM.render(component, container)
     })
-    const span = container.getElementsByTagName('span')[0]
-    const button = container.getElementsByTagName('button')[0]
+    const span = document.getElementsByTagName('span')[0]
+    const buttonClick = document.getElementById('click')
     expect(span.textContent).toBe('ABC')
     act(() => {
-      button.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      if (buttonClick) {
+        buttonClick.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      }
     })
     expect(span.textContent).toBe('New text')
   })
-  test('It should not update', () => {
-    const a = <NotUpdatedComponent newText='New text' />
+  test('It should undo last action', () => {
+    const component = <TestComponent newText='New text' />
     act(() => {
-      ReactDOM.render(a, container)
+      ReactDOM.render(component, container)
+    })
+    const buttonUndo = document.getElementById('undo')
+    act(() => {
+      if (buttonUndo) {
+        buttonUndo.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      }
+    })
+    const span = document.getElementsByTagName('span')[0]
+    expect(span.textContent).toBe('ABC')
+  })
+  test('It should redo last action', () => {
+    const component = <TestComponent newText='New text' />
+    act(() => {
+      ReactDOM.render(component, container)
+    })
+    const buttonRedo = document.getElementById('redo')
+    act(() => {
+      if (buttonRedo) {
+        buttonRedo.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      }
+    })
+    const span = document.getElementsByTagName('span')[0]
+    expect(span.textContent).toBe('New text')
+  })
+  test('It should not update by "anotherText" change', () => {
+    const component = <NotUpdatedComponent newText='New text' />
+    act(() => {
+      ReactDOM.render(component, container)
     })
     const span = container.getElementsByTagName('span')[0]
     const button = container.getElementsByTagName('button')[0]
