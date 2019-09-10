@@ -127,7 +127,7 @@ const useGlobalHook = <S>(
   initialState: S,
   actions: any,
   options?: IStoreOptions<S>
-): ((listenedTree?: DeepBoolPartial<S>) => [S, any, DeepPartial<S>]) => {
+): ({ hook: (listenedTree?: DeepBoolPartial<S>) => [S, any, DeepPartial<S>], store: IStore<S> }) => {
   const defaultOptions: IStoreOptions<S> = {
     debug: true,
     persistTree: false,
@@ -147,8 +147,13 @@ const useGlobalHook = <S>(
   }
   store.setState = setState.bind(store)
   store.actions = associateActions(store, actions)
+  actions = store.actions
   initializer<S>(store)
-  return (listenedTree?: DeepBoolPartial<S>) => useListener.bind(store, React, listenedTree)()
+  const makeHook = (listenedTree?: DeepBoolPartial<S>) => useListener.bind(store, React, listenedTree)
+  return {
+    hook: makeHook(),
+    store
+  }
 }
 
 export default useGlobalHook
