@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import ReactDOM from 'react-dom'
 import { act } from 'react-dom/test-utils'
 import useGlobalHook from './lib'
@@ -26,7 +26,7 @@ const actions = {
   }
 }
 
-const useGlobal = useGlobalHook(React, initialState, actions, { debug: false, undoable: true })
+const useGlobal = useGlobalHook(React, initialState, actions, { debug: false, undoable: true }).hook
 
 const TestComponent = (props: { newText: string }) => {
   const [globalState, globalActions] = useGlobal({

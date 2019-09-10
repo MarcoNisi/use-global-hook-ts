@@ -54,7 +54,7 @@ const useGlobal = useGlobalHook(React, initialState, actions, {
   persistExp: 60,
   undoable: true,
   maxUndoable: 10
-})
+}).hook
 ``` 
 
 Each ```action``` receive as first parameter the ```Store```. With this store you can use the method ```setState``` in order to change the app state and you can also read the latter using the property ```state``` of the store.
@@ -118,7 +118,7 @@ const actions = {
 
 const useGlobal = useGlobalHook(React, initialState, actions, {
   debug: true
-})
+}).hook
 
 const ExampleComponent = (_: any) => {
   const [globalState, globalActions, lastChanges] = useGlobal()
