@@ -4,16 +4,15 @@ export interface IStore<S> {
   past: S[]
   setState: (changes: DeepPartial<S>, isFromHistory?: boolean) => void
   listeners: any[]
-  actions: any,
-  lastChanges: DeepPartial<S> | null,
+  lastChanges: DeepPartial<S> | null
   options: IStoreOptions<S>
 }
 
 export interface IStoreOptions<S> {
-  debug?: boolean,
-  persistTree?: DeepBoolPartial<S> | boolean,
-  undoable?: boolean,
-  maxUndoable?: number,
+  debug?: boolean
+  persistTree?: DeepBoolPartial<S> | boolean
+  undoable?: boolean
+  maxUndoable?: number
   persistExp?: number
 }
 

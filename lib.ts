@@ -28,7 +28,7 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isFromHistory: bo
   })
   if (this.options.persistTree) {
     const toBeStored = this.options.persistTree === true ? this.state : overlap(this.state, this.options.persistTree)
-    const exp = this.options.persistExp ? Date.now() + (this.options.persistExp * 1000) : null
+    const exp = this.options.persistExp ? Date.now() + this.options.persistExp * 1000 : null
     debouncedSetItem(toBeStored, exp)
   }
   if (this.options.undoable && !isFromHistory) {
@@ -38,16 +38,16 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isFromHistory: bo
   }
 }
 
-function useListener<S>(this: IStore<S>, React: any, listenedTree: DeepBoolPartial<S>): [any, any, any] {
+function useListener<S>(store: IStore<S>, React: any, listenedTree?: DeepBoolPartial<S>): [S, DeepPartial<S>] {
   const newSetState = React.useState()[1]
   React.useEffect(() => {
-    this.listeners.push({ setState: newSetState, listenedTree })
+    store.listeners.push({ setState: newSetState, listenedTree })
     return () => {
-      this.listeners = this.listeners.filter((listener: Listener<S>) => listener.setState !== newSetState)
+      store.listeners = store.listeners.filter((listener: Listener<S>) => listener.setState !== newSetState)
     }
   }, [newSetState])
-  const lastChanges = this.lastChanges ? overlap(this.lastChanges, listenedTree) : null
-  return [this.state, this.actions, lastChanges]
+  const lastChanges = store.lastChanges ? overlap(store.lastChanges, listenedTree) : null
+  return [store.state, lastChanges]
 }
 
 const makeUndo = <S>(store: IStore<S>) => {
@@ -87,26 +87,11 @@ const makeRedo = <S>(store: IStore<S>) => {
   }
 }
 
-const associateActions = <S>(store: IStore<S>, actions: any) => {
-  const associatedActions: any = {}
-  Object.keys(actions).forEach(key => {
-    if (typeof actions[key] === 'function') {
-      associatedActions[key] = actions[key].bind(null, store)
-    }
-    if (typeof actions[key] === 'object') {
-      associatedActions[key] = associateActions(store, actions[key])
-    }
-  })
-  associatedActions.undo = makeUndo(store)
-  associatedActions.redo = makeRedo(store)
-  return associatedActions
-}
-
 const initializer = <S>(store: IStore<S>) => {
   try {
     const storedState = localStorage.getItem(localStorageKey)
     const exp = localStorage.getItem(localStorageKeyExp)
-    const expired = exp && exp < ('' + Date.now())
+    const expired = exp && exp < '' + Date.now()
     if (storedState && !expired) {
       const parsedStoredState = JSON.parse(storedState)
       let filteredState = {}
@@ -118,16 +103,21 @@ const initializer = <S>(store: IStore<S>) => {
         })
       }
     }
-  } catch (_) {
-  }
+  } catch (_) {}
 }
 
-const useGlobalHook = <S>(
+const createStore = <S>(
   React: any,
   initialState: S,
-  actions: any,
   options?: IStoreOptions<S>
-): ({ hook: (listenedTree?: DeepBoolPartial<S>) => [S, any, DeepPartial<S>], store: IStore<S> }) => {
+): {
+  useGlobal: (listenedTree?: DeepBoolPartial<S>) => [S, DeepPartial<S>]
+  store: IStore<S>
+  historyActions: {
+    undo: () => void
+    redo: () => void
+  }
+} => {
   const defaultOptions: IStoreOptions<S> = {
     debug: true,
     persistTree: false,
@@ -141,18 +131,19 @@ const useGlobalHook = <S>(
     past: [],
     listeners: [],
     setState,
-    actions,
     lastChanges: null,
     options: options ? { ...defaultOptions, ...options } : defaultOptions
   }
   store.setState = setState.bind(store)
-  store.actions = associateActions(store, actions)
-  actions = store.actions
   initializer<S>(store)
   return {
-    hook: (listenedTree?: DeepBoolPartial<S>) => useListener.bind(store, React, listenedTree)(),
-    store
+    useGlobal: (listenedTree?: DeepBoolPartial<S>) => useListener(store, React, listenedTree),
+    store,
+    historyActions: {
+      undo: makeUndo(store),
+      redo: makeRedo(store)
+    }
   }
 }
 
-export default useGlobalHook
+export default createStore

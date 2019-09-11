@@ -1,13 +1,11 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { act } from 'react-dom/test-utils'
-import useGlobalHook from './lib'
-import { IStore } from './interfaces'
-
+import createStore from './lib'
 
 interface IAppState {
-  text: string,
-  anotherText: string,
+  text: string
+  anotherText: string
   data: string
 }
 
@@ -18,38 +16,44 @@ const initialState = {
 }
 
 const actions = {
-  changeText: (store: IStore<IAppState>, newText: string) => {
+  changeText: (newText: string) => {
     store.setState({ text: newText })
   },
-  changeAnotherText: (store: IStore<IAppState>, newText: string) => {
+  changeAnotherText: (newText: string) => {
     store.setState({ anotherText: newText })
   }
 }
 
-const useGlobal = useGlobalHook(React, initialState, actions, { debug: false, undoable: true }).hook
+const { useGlobal, store, historyActions } = { ...createStore(React, initialState, { debug: false, undoable: true }) }
 
 const TestComponent = (props: { newText: string }) => {
-  const [globalState, globalActions] = useGlobal({
+  const [globalState] = useGlobal({
     text: true
   })
   const onClick = () => {
-    globalActions.changeText(props.newText)
+    actions.changeText(props.newText)
   }
   return (
     <>
       <span>{globalState.text}</span>
-      <button onClick={onClick} id="click">Click</button>
-      <button onClick={globalActions.undo} id="undo">Undo</button>
-      <button onClick={globalActions.redo} id="redo">Redo</button>
+      <button onClick={onClick} id="click">
+        Click
+      </button>
+      <button onClick={historyActions.undo} id="undo">
+        Undo
+      </button>
+      <button onClick={historyActions.redo} id="redo">
+        Redo
+      </button>
     </>
   )
 }
 const NotUpdatedComponent = (props: { newText: string }) => {
-  const [globalState, globalActions] = useGlobal({
+  const [globalState] = useGlobal({
     data: true
   })
   const onClick = () => {
-    globalActions.changeAnotherText(props.newText)
+    actions.changeAnotherText(props.newText)
   }
   return (
     <>
@@ -72,7 +76,7 @@ afterAll(() => {
 
 describe('Test use-global-hook-ts', () => {
   test('It shows the expected text when clicked', () => {
-    const component = <TestComponent newText='New text' />
+    const component = <TestComponent newText="New text" />
     act(() => {
       ReactDOM.render(component, container)
     })
@@ -87,7 +91,7 @@ describe('Test use-global-hook-ts', () => {
     expect(span.textContent).toBe('New text')
   })
   test('It should undo last action', () => {
-    const component = <TestComponent newText='New text' />
+    const component = <TestComponent newText="New text" />
     act(() => {
       ReactDOM.render(component, container)
     })
@@ -101,7 +105,7 @@ describe('Test use-global-hook-ts', () => {
     expect(span.textContent).toBe('ABC')
   })
   test('It should redo last action', () => {
-    const component = <TestComponent newText='New text' />
+    const component = <TestComponent newText="New text" />
     act(() => {
       ReactDOM.render(component, container)
     })
@@ -115,7 +119,7 @@ describe('Test use-global-hook-ts', () => {
     expect(span.textContent).toBe('New text')
   })
   test('It should not update by "anotherText" change', () => {
-    const component = <NotUpdatedComponent newText='New text' />
+    const component = <NotUpdatedComponent newText="New text" />
     act(() => {
       ReactDOM.render(component, container)
     })

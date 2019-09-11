@@ -10,11 +10,10 @@ npm i use-global-hook-ts
 ```
 
 ### Docs
-The method ```useGlobalHook``` accept five paramters:
+The method ```useGlobalHook``` accept four paramters:
 1. ```React```: Your instance of React;
 2. ```initialState```: the initial state of your app;
-3. ```actions```: an object of any structure with the methods to change the state of app;
-4. ```options```: store configurations: 
+3. ```options```: store configurations: 
     - ```persistTree```: a subset of app state's keys with boolean values that will be saved and auto refilled on page reload OR ```true``` if you want to save all the state OR ```false``` if you want to save nothing;
     - ```persistExp```: you can pass the number of seconds after which the stored state will be discarded;
     - ```debug```: if ```true``` each action that change the state of app will be logged in console;
@@ -23,7 +22,7 @@ The method ```useGlobalHook``` accept five paramters:
     - More options will come soon!
 
 ```ts
-import useGlobalHook, { IStore } from 'use-global-hook-ts'
+import createStore, { IStore } from 'use-global-hook-ts'
 
 interface IAppState {
   movies: string[],
@@ -35,17 +34,7 @@ const initialState: IAppState = {
   loggedUser: null
 }
 
-const actions = {
-  movies: {
-    addMovie: (store: IStore<IAppState>, movie: string) => {
-      const newMovies = [ ...store.state.movies, movie ]
-      const newState = { ...store.state, movies: newMovies }
-      store.setState(newState)
-    }
-  }
-}
-
-const useGlobal = useGlobalHook(React, initialState, actions, {
+const { useGlobal, store } = createStore(React, initialState, {
   debug: true,
   persistTree: {
     movies: false,
@@ -54,16 +43,25 @@ const useGlobal = useGlobalHook(React, initialState, actions, {
   persistExp: 60,
   undoable: true,
   maxUndoable: 10
-}).hook
+})
+
+const actions = {
+  movies: {
+    addMovie: (movie: string) => {
+      const newMovies = [ ...store.state.movies, movie ]
+      const newState = { ...store.state, movies: newMovies }
+      store.setState(newState)
+    }
+  }
+}
 ``` 
 
-Each ```action``` receive as first parameter the ```Store```. With this store you can use the method ```setState``` in order to change the app state and you can also read the latter using the property ```state``` of the store.
+Inside each ```action``` you have to use the method ```setState``` of ```store``` in order to change the app state and you can also read the latter using the property ```state``` of the store.
 
-When call ```useGlobal``` inside a component you can pass an object with a sub set of app state's keys with boolean value. The component will be updated only when the sub set of app state will change (see Example).
+When call ```useGlobal``` inside a component you can pass an object with a sub set of app state's keys with boolean values. The component will be updated only when the sub set of app state will change (see Example).
 
-```useGlobal``` return three elements when is called inside a component:
+```useGlobal``` returns two elements when is called inside a component:
 1. ```globalState```: last version of the app state;
-2. ```globalActions```: actions that can be called in order to change the app state;
 3. ```lastChanges```: last changes made on the app state (```null``` if no changes are made yet). 
 
 The app state is **immutable** (by Object.freeze) in order to guarantee that any component can't change it without using the actions.
@@ -88,7 +86,7 @@ const persistTree = {
 You can use this package also with class components wrapping them into a HOC Component (see Example).
 
 ### Undo/Redo
-In the ```globalActions``` you'll find the actions ```undo``` and ```redo``` that you can use respectively in order to revert or reapply the last action. You have to pass ```undoable: true``` in the options of the store in order to use this feature.
+The ```createStore``` returns the property ```historyActions``` with the methods ```undo``` and ```redo``` that you can use respectively in order to revert or reapply the last action. You have to pass ```undoable: true``` in the options of the store in order to use this feature.
 
 This feature will be improved in the next releases.
 
@@ -98,7 +96,7 @@ You can use this library also for React Native development but, for the moment, 
 ### Basic example
 ```tsx
 import React from 'react'
-import useGlobalHook, { IStore } from 'use-global-hook-ts'
+import createStore, { IStore, store } from 'use-global-hook-ts'
 
 interface IAppState {
   text: string,
@@ -110,23 +108,23 @@ const initialState: IAppState = {
   data: 'Useless'
 }
 
+const { useGlobal, store } = createStore(React, initialState, {
+  debug: true
+})
+
 const actions = {
-  changeText: (store: IStore<IAppState>, newText: string) => {
+  changeText: (newText: string) => {
     store.setState({ text: newText })
   }
 }
 
-const useGlobal = useGlobalHook(React, initialState, actions, {
-  debug: true
-}).hook
-
 const ExampleComponent = (_: any) => {
-  const [globalState, globalActions, lastChanges] = useGlobal()
+  const [globalState, lastChanges] = useGlobal()
   React.useEffect(() => {
     setTimeout(() => {
-      globalActions.changeText('New text')
+      actions.changeText('New text')
     }, 1000)
-  }, [globalActions])
+  }, [])
   console.log('ExampleComponent render. Last changes', lastChanges)
   return <span>{globalState.text}</span>
 }
