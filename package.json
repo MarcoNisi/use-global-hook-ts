@@ -1,6 +1,6 @@
 {
   "name": "use-global-hook-ts",
-  "version": "0.7.0",
+  "version": "1.0.0",
   "description": "State management for React using Hooks with Typescript.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
