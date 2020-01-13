@@ -3,12 +3,6 @@ import ReactDOM from 'react-dom'
 import { act } from 'react-dom/test-utils'
 import createStore from './lib'
 
-interface IAppState {
-  text: string
-  anotherText: string
-  data: string
-}
-
 const initialState = {
   text: 'ABC',
   anotherText: 'DEF',
