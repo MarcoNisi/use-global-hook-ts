@@ -10,15 +10,15 @@ const debouncedSetItem = debounce(<S>(toBeStored: DeepPartial<S>, exp: string | 
   if (exp) localStorage.setItem(localStorageKeyExp, JSON.stringify(exp))
 }, 500)
 
-function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isFromHistory: boolean = false) {
-  const oldState = cloneDeep(this.state)
+function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isFromHistory: boolean = false, disableDeepClone: boolean = false) {
+  const oldState = disableDeepClone ? { ...this.state } : cloneDeep(this.state)
   this.state = Object.freeze(deepUpdate({ ...this.state }, changes))
   this.lastChanges = changes
   if (this.options.debug) {
     console.group('STATE CHANGE')
     console.log('%c OLD STATE', 'color: grey; font-weight: bold;', oldState)
     console.log('%c CHANGES', 'color: blue; font-weight: bold;', changes)
-    console.log('%c NEW STATE', 'color: green; font-weight: bold;', cloneDeep(this.state))
+    console.log('%c NEW STATE', 'color: green; font-weight: bold;', disableDeepClone ? { ...this.state } : cloneDeep(this.state))
     console.groupEnd()
   }
   this.listeners.forEach((listener: Listener<S>) => {
