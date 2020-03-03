@@ -7,7 +7,11 @@
   "scripts": {
     "test": "jest test.tsx",
     "watch": "./node_modules/.bin/tsc --watch",
-    "build": "./node_modules/.bin/tsc --build"
+    "build": "./node_modules/.bin/tsc --build",
+    "release:patch": "npm run build && npm version patch && git push origin && git push origin --tags",
+    "release:minor": "npm run build && npm version minor && git push origin && git push origin --tags",
+    "release:major": "npm run build && npm version major && git push origin && git push origin --tags",
+    "publish": "npm publish"
   },
   "repository": {
     "type": "git",
