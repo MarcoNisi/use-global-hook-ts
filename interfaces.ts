@@ -2,7 +2,7 @@ export interface IStore<S> {
   state: S
   future: S[]
   past: S[]
-  setState: (changes: DeepPartial<S>, isFromHistory?: boolean) => void
+  setState: (changes: DeepPartial<S>, isFromHistory?: boolean, disableDeepClone?: boolean) => void
   listeners: any[]
   lastChanges: DeepPartial<S> | null
   options: IStoreOptions<S>
