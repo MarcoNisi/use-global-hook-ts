@@ -1,4 +1,4 @@
-import { IStore, DeepPartial, DeepBoolPartial, Listener, IStoreOptions } from './interfaces'
+import { IStore, DeepPartial, DeepBoolPartial, Listener, IStoreOptions, ISetStateConf } from './interfaces'
 import { cloneDeep, deepUpdate, shouldUpdate, overlap, debounce } from './utils'
 
 const localStorageKey = 'useGlobalHookTs__storedState'
@@ -10,7 +10,15 @@ const debouncedSetItem = debounce(<S>(toBeStored: DeepPartial<S>, exp: string | 
   if (exp) localStorage.setItem(localStorageKeyExp, JSON.stringify(exp))
 }, 500)
 
-function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isFromHistory: boolean = false, disableDeepClone: boolean = false) {
+function setState<S>(
+  this: IStore<S>,
+  changes: DeepPartial<S>,
+  params?: ISetStateConf
+) {
+  const isFromHistory = (params && params.isFromHistory) || false
+  const disableDeepClone = (params && params.disableDeepClone) || true
+  const defer = (params && params.defer) || false
+
   const oldState = disableDeepClone ? { ...this.state } : cloneDeep(this.state)
   this.state = Object.freeze(deepUpdate({ ...this.state }, changes))
   this.lastChanges = changes
@@ -23,7 +31,11 @@ function setState<S>(this: IStore<S>, changes: DeepPartial<S>, isFromHistory: bo
   }
   this.listeners.forEach((listener: Listener<S>) => {
     if (shouldUpdate<DeepBoolPartial<S>>(listener.listenedTree, changes)) {
-      listener.setState(this.state)
+      if (defer) {
+        setTimeout(() => listener.setState(this.state), 0)
+      } else {
+        listener.setState(this.state)
+      }
     }
   })
   if (this.options.persistTree) {
@@ -58,7 +70,7 @@ const makeUndo = <S>(store: IStore<S>) => {
       store.future = [cloneDeep(store.state), ...store.future]
       store.past = newPast
       cutHistory(store)
-      store.setState(previous, true)
+      store.setState(previous, { isFromHistory: true })
     }
   }
 }
@@ -82,7 +94,7 @@ const makeRedo = <S>(store: IStore<S>) => {
       store.past = [...store.past, cloneDeep(store.state)]
       store.future = newFuture
       cutHistory(store)
-      store.setState(next, true)
+      store.setState(next, { isFromHistory: true })
     }
   }
 }
