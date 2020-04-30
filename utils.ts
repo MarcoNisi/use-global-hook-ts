@@ -5,7 +5,7 @@ export const deepUpdate = (oldObject: any, changes: any) => {
     try {
       if (changes[prop].constructor === Object) {
         oldObject[prop] = deepUpdate(oldObject[prop], changes[prop])
-      } else if (oldObject.hasOwnProperty(prop)) {
+      } else {
         oldObject[prop] = changes[prop]
       }
     } catch (e) {
