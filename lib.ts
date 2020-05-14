@@ -138,7 +138,7 @@ const createStore = <S>(
     persistExp: 0
   }
   const store: IStore<S> = {
-    state: initialState,
+    state: cloneDeep(initialState),
     future: [],
     past: [],
     listeners: [],
