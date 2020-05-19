@@ -64,7 +64,9 @@ When call ```useGlobal``` inside a component you can pass an object with a sub s
 1. ```globalState```: last version of the app state;
 3. ```lastChanges```: last changes made on the app state (```null``` if no changes are made yet). 
 
-The app state is **immutable** (by Object.freeze) in order to guarantee that any component can't change it without using the actions.
+### Immutability
+With the option ```freezable``` the app state is **immutable** (by a deep freeze function) in order to guarantee that any component can't change it without using the actions.
+If you try to directly mutate the state in ```strict``` mode, it will throw an error, otherwise it will fail silently.
 
 ### Persist
 With the option ```persistTree``` you can achieve almost all of what you can do with [redux-persist blacklist and whitelist](https://www.npmjs.com/package/redux-persist#blacklist--whitelist). If you want to save only some keys of your app state, just set them with ```true``` inside the ```persistTree```. In a similar manner, if you want to exclude some other keys, set them to ```false```.

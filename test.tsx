@@ -6,7 +6,9 @@ import createStore from './lib'
 const initialState = {
   text: 'ABC',
   anotherText: 'DEF',
-  data: 'Useless'
+  data: 'Useless',
+  array: [1, 2, 3],
+  obj: { testProp: 'test' }
 }
 
 const actions = {
@@ -18,7 +20,7 @@ const actions = {
   }
 }
 
-const { useGlobal, store, historyActions } = { ...createStore(React, initialState, { debug: false, undoable: true }) }
+const { useGlobal, store, historyActions } = { ...createStore(React, initialState, { debug: false, undoable: true, freezable: true }) }
 
 const TestComponent = (props: { newText: string }) => {
   const [globalState] = useGlobal({
@@ -124,5 +126,17 @@ describe('Test use-global-hook-ts', () => {
       button.dispatchEvent(new MouseEvent('click', { bubbles: true }))
     })
     expect(span.textContent).toBe('DEF')
+  })
+  test('It should throw if mutate state directly', () => {
+    expect(store.state.text).toBe('New text')
+    expect(() => {
+      store.state.array.push(4)
+    }).toThrow()
+    expect(() => {
+      store.state.obj.testProp = 'Very very bad'
+    }).toThrow()
+    expect(() => {
+      store.state.text = 'Very bad'
+    }).toThrow()
   })
 })

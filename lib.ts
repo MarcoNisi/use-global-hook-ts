@@ -1,5 +1,5 @@
 import { IStore, DeepPartial, DeepBoolPartial, Listener, IStoreOptions, ISetStateConf } from './interfaces'
-import { cloneDeep, deepUpdate, shouldUpdate, overlap, debounce } from './utils'
+import { cloneDeep, deepUpdate, shouldUpdate, overlap, debounce, deepFreeze } from './utils'
 
 const localStorageKey = 'useGlobalHookTs__storedState'
 const localStorageKeyExp = 'useGlobalHookTs__exp'
@@ -20,7 +20,8 @@ function setState<S>(
   const defer = (params && params.defer) || false
 
   const oldState = disableDeepClone ? { ...this.state } : cloneDeep(this.state)
-  this.state = Object.freeze(deepUpdate({ ...this.state }, changes))
+  const newState = deepUpdate({ ...this.state }, changes)
+  this.state = this.options.freezable ? deepFreeze(newState) : newState
   this.lastChanges = changes
   if (this.options.debug) {
     console.group('STATE CHANGE')
@@ -135,7 +136,8 @@ const createStore = <S>(
     persistTree: false,
     undoable: false,
     maxUndoable,
-    persistExp: 0
+    persistExp: 0,
+    freezable: false
   }
   const store: IStore<S> = {
     state: cloneDeep(initialState),

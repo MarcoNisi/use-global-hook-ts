@@ -20,6 +20,7 @@ export interface IStoreOptions<S> {
   undoable?: boolean
   maxUndoable?: number
   persistExp?: number
+  freezable?: boolean
 }
 
 export type DeepBoolPartial<T> = {
