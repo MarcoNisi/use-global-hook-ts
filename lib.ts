@@ -16,18 +16,17 @@ function setState<S>(
   params?: ISetStateConf
 ) {
   const isFromHistory = (params && params.isFromHistory) || false
-  const disableDeepClone = (params && params.disableDeepClone) || true
   const defer = (params && params.defer) || false
 
-  const oldState = disableDeepClone ? { ...this.state } : deepClone(this.state)
-  const newState = deepUpdate({ ...this.state }, changes)
+  const oldState = deepClone(this.state)
+  const newState = deepUpdate(deepClone(this.state), changes)
   this.state = this.options.freezable ? deepFreeze(newState) : newState
   this.lastChanges = changes
   if (this.options.debug) {
     console.group('STATE CHANGE')
     console.log('%c OLD STATE', 'color: grey; font-weight: bold;', oldState)
     console.log('%c CHANGES', 'color: blue; font-weight: bold;', changes)
-    console.log('%c NEW STATE', 'color: green; font-weight: bold;', disableDeepClone ? { ...this.state } : deepClone(this.state))
+    console.log('%c NEW STATE', 'color: green; font-weight: bold;', this.options.freezable ? this.state : deepClone(this.state))
     console.groupEnd()
   }
   this.listeners.forEach((listener: Listener<S>) => {

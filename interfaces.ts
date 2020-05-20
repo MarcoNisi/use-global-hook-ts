@@ -1,6 +1,5 @@
 export interface ISetStateConf {
   isFromHistory?: boolean
-  disableDeepClone?: boolean
   defer?: boolean
 }
 
