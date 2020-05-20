@@ -42,11 +42,11 @@ export const shouldUpdate = <S>(listenedTree: S, changes: DeepPartial<S>): boole
   return Object.keys(commonKeys).length > 0
 }
 
-export const cloneDeep = (oldObject: any) => {
+export const deepClone = (oldObject: any) => {
   let newObject: any = Array.isArray(oldObject) ? [] : {}
   for (const prop in oldObject) {
     if (typeof oldObject[prop] === 'object') {
-      newObject[prop] = cloneDeep(oldObject[prop])
+      newObject[prop] = deepClone(oldObject[prop])
     } else {
       newObject[prop] = oldObject[prop]
     }

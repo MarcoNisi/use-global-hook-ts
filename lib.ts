@@ -1,5 +1,5 @@
 import { IStore, DeepPartial, DeepBoolPartial, Listener, IStoreOptions, ISetStateConf } from './interfaces'
-import { cloneDeep, deepUpdate, shouldUpdate, overlap, debounce, deepFreeze } from './utils'
+import { deepClone, deepUpdate, shouldUpdate, overlap, debounce, deepFreeze } from './utils'
 
 const localStorageKey = 'useGlobalHookTs__storedState'
 const localStorageKeyExp = 'useGlobalHookTs__exp'
@@ -19,7 +19,7 @@ function setState<S>(
   const disableDeepClone = (params && params.disableDeepClone) || true
   const defer = (params && params.defer) || false
 
-  const oldState = disableDeepClone ? { ...this.state } : cloneDeep(this.state)
+  const oldState = disableDeepClone ? { ...this.state } : deepClone(this.state)
   const newState = deepUpdate({ ...this.state }, changes)
   this.state = this.options.freezable ? deepFreeze(newState) : newState
   this.lastChanges = changes
@@ -27,7 +27,7 @@ function setState<S>(
     console.group('STATE CHANGE')
     console.log('%c OLD STATE', 'color: grey; font-weight: bold;', oldState)
     console.log('%c CHANGES', 'color: blue; font-weight: bold;', changes)
-    console.log('%c NEW STATE', 'color: green; font-weight: bold;', disableDeepClone ? { ...this.state } : cloneDeep(this.state))
+    console.log('%c NEW STATE', 'color: green; font-weight: bold;', disableDeepClone ? { ...this.state } : deepClone(this.state))
     console.groupEnd()
   }
   this.listeners.forEach((listener: Listener<S>) => {
@@ -68,7 +68,7 @@ const makeUndo = <S>(store: IStore<S>) => {
     const previous = store.past[store.past.length - 1]
     if (previous) {
       const newPast = store.past.slice(0, store.past.length - 1)
-      store.future = [cloneDeep(store.state), ...store.future]
+      store.future = [deepClone(store.state), ...store.future]
       store.past = newPast
       cutHistory(store)
       store.setState(previous, { isFromHistory: true })
@@ -92,7 +92,7 @@ const makeRedo = <S>(store: IStore<S>) => {
     const next = store.future[0]
     if (next) {
       const newFuture = store.future.slice(1)
-      store.past = [...store.past, cloneDeep(store.state)]
+      store.past = [...store.past, deepClone(store.state)]
       store.future = newFuture
       cutHistory(store)
       store.setState(next, { isFromHistory: true })
@@ -140,7 +140,7 @@ const createStore = <S>(
     freezable: false
   }
   const store: IStore<S> = {
-    state: cloneDeep(initialState),
+    state: deepClone(initialState),
     future: [],
     past: [],
     listeners: [],
