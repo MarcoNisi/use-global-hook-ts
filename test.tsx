@@ -15,6 +15,9 @@ const actions = {
   changeText: (newText: string) => {
     store.setState({ text: newText })
   },
+  changeTextAsync: (newText: string) => {
+    store.setState({ text: newText }, { defer: true })
+  },
   changeAnotherText: (newText: string) => {
     store.setState({ anotherText: newText })
   }
@@ -29,6 +32,9 @@ const TestComponent = (props: { newText: string }) => {
   const onClick = () => {
     actions.changeText(props.newText)
   }
+  const onAsyncClick = () => {
+    actions.changeTextAsync(props.newText)
+  }
   return (
     <>
       <span>{globalState.text}</span>
@@ -40,6 +46,9 @@ const TestComponent = (props: { newText: string }) => {
       </button>
       <button onClick={historyActions.redo} id="redo">
         Redo
+      </button>
+      <button onClick={onAsyncClick} id="async-click">
+        Async click
       </button>
     </>
   )
@@ -138,5 +147,26 @@ describe('Test use-global-hook-ts', () => {
     expect(() => {
       store.state.text = 'Very bad'
     }).toThrow()
+  })
+  test('setState should be async with "{ defer: true }"', () => {
+    const component = <TestComponent newText="New async text" />
+    act(() => {
+      ReactDOM.render(component, container)
+    })
+    const span = document.getElementsByTagName('span')[0]
+    const buttonClick = document.getElementById('asyncClick')
+    expect(span.textContent).toBe('New text')
+    act(() => {
+      if (buttonClick) {
+        buttonClick.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+      }
+    })
+    expect(span.textContent).toBe('New text')
+  })
+  test('It save "lastChanges" correctly', () => {
+    act(() => {
+      store.setState({ text: 'A new text' })
+    })
+    expect(store.lastChanges).toEqual({ text: 'A new text' })
   })
 })
