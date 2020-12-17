@@ -79,8 +79,8 @@ afterAll(() => {
   container = null
 })
 
-describe('Test use-global-hook-ts', () => {
-  test('It shows the expected text when clicked', () => {
+describe('use-global-hook-ts', () => {
+  it('should shows the expected text when clicked', () => {
     const component = <TestComponent newText="New text" />
     act(() => {
       ReactDOM.render(component, container)
@@ -95,7 +95,7 @@ describe('Test use-global-hook-ts', () => {
     })
     expect(span.textContent).toBe('New text')
   })
-  test('It should undo last action', () => {
+  it('should undo last action', () => {
     const component = <TestComponent newText="New text" />
     act(() => {
       ReactDOM.render(component, container)
@@ -109,7 +109,7 @@ describe('Test use-global-hook-ts', () => {
     const span = document.getElementsByTagName('span')[0]
     expect(span.textContent).toBe('ABC')
   })
-  test('It should redo last action', () => {
+  it('should redo last action', () => {
     const component = <TestComponent newText="New text" />
     act(() => {
       ReactDOM.render(component, container)
@@ -123,7 +123,7 @@ describe('Test use-global-hook-ts', () => {
     const span = document.getElementsByTagName('span')[0]
     expect(span.textContent).toBe('New text')
   })
-  test('It should not update by "anotherText" change', () => {
+  it('should not update by "anotherText" change', () => {
     const component = <NotUpdatedComponent newText="New text" />
     act(() => {
       ReactDOM.render(component, container)
@@ -136,7 +136,7 @@ describe('Test use-global-hook-ts', () => {
     })
     expect(span.textContent).toBe('DEF')
   })
-  test('It should throw if mutate state directly', () => {
+  it('should throw if mutate state directly', () => {
     expect(store.state.text).toBe('New text')
     expect(() => {
       store.state.array.push(4)
@@ -148,7 +148,7 @@ describe('Test use-global-hook-ts', () => {
       store.state.text = 'Very bad'
     }).toThrow()
   })
-  test('setState should be async with "{ defer: true }"', () => {
+  it('should make setState async with "{ defer: true }"', () => {
     const component = <TestComponent newText="New async text" />
     act(() => {
       ReactDOM.render(component, container)
@@ -163,7 +163,7 @@ describe('Test use-global-hook-ts', () => {
     })
     expect(span.textContent).toBe('New text')
   })
-  test('It save "lastChanges" correctly', () => {
+  it('should save "lastChanges" correctly', () => {
     act(() => {
       store.setState({ text: 'A new text' })
     })
